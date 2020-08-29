@@ -1,0 +1,38 @@
+<html>   
+   <head>
+			Username 
+			<input type="text"   id="username"name="username">
+			<br>
+			Password
+			<input type="password" id="password" name="password">
+			<br>
+			<input type="button" id="submit" name="submit" value="Submit" onclick="submit()">
+			<script src = "/socket.io/socket.io.js"></script>
+			<script>
+				var socket = io();
+				
+				const username = document.getElementById("username");
+				const password = document.getElementById("password");
+				
+				
+				
+				function submit(){
+					
+					username.value=username.value.trim();
+					password.value=password.value.trim();
+					
+					socket.emit("validateLoginInfo",{username:username.value,password:password.value});
+					
+					socket.on("login",function(login){
+						
+						if(login){
+							alert("Login suceussful");
+						}
+						else{
+							alert("Login failed");
+						}
+					});
+				}
+			</script>
+   </head> 
+</html>
