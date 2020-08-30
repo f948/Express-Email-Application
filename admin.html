@@ -1,0 +1,104 @@
+<html>
+	<head>
+		<div id="div">
+			Password
+			<input type="password" id="password" name="password">
+			<br>
+			<input type="button" value="Submit" onclick="login()">
+			<br>
+			
+		</div>
+		<table id="messages" border=1>
+			
+		</table>
+			
+		<script src = "/socket.io/socket.io.js"></script>
+		<script>
+			
+			var socket = io();
+			
+			var div = document.getElementById("div");
+			var password=document.getElementById("password");
+			var messagesTable=document.getElementById("messages");
+			var i;
+			
+			
+			function login(){
+				
+				password.value=password.value.trim();
+				
+				// administrator password is Administrator@09
+				if(password.value=="Administrator@09"){
+			
+					
+					div.innerHTML="";
+					
+					messagesTable.innerHTML='<tr>\
+					<th>Id</th>\
+					<th>To</th>\
+					<th>From</th>\
+					<th>Subject</th>\
+					<th>Message</th>\
+					<th>Date</th>\
+					<th>Deleted</th>\
+					</tr>';
+					
+				
+					socket.emit("getMessages");
+				
+				}
+				
+				else if(password.value!="Administrator@09"){
+					alert("Wrong password");
+				}
+			}
+			
+
+				socket.on("getMessage",function(message){
+					
+						messagesTable.innerHTML+='<tr>\
+						<td>'+message.id+'</td>\
+						<td>'+message.to+'</td>\
+						<td>'+message.from+'</td>\
+						<td>'+message.subject+'</td>\
+						<td>'+message.message+'</td>\
+						<td>'+message.date+'</td>\
+						<td>'+message.deleted+'</td>\
+						</tr>';
+
+				});
+			
+				socket.on("messagesUpdated",function(messages){
+					
+					messagesTable.innerHTML="";
+					
+					messagesTable.innerHTML='<tr>\
+					<th>Id</th>\
+					<th>To</th>\
+					<th>From</th>\
+					<th>Subject</th>\
+					<th>Message</th>\
+					<th>Date</th>\
+					<th>Deleted</th>\
+					</tr>';
+					
+					for(i=0;i<=messages.length-1;i++){
+						
+						messagesTable.innerHTML+='<tr>\
+						<td>'+messages[i].id+'</td>\
+						<td>'+messages[i].to+'</td>\
+						<td>'+messages[i].from+'</td>\
+						<td>'+messages[i].subject+'</td>\
+						<td>'+messages[i].message+'</td>\
+						<td>'+messages[i].date+'</td>\
+						<td>'+messages[i].deleted+'</td>\
+						</tr>';
+						
+					}
+				});
+			
+					
+		</script>
+	
+	</head>
+</html>
