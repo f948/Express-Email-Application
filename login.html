@@ -1,0 +1,111 @@
+<html>   
+   <head>
+		<div id="container">
+			Username 
+			<input type="text"   id="username"name="username">
+			<br>
+			Password
+			<input type="password" id="password" name="password">
+			<br>
+			<input type="button" id="submit" name="submit" value="Submit" onclick="submit()">
+			
+		</div>
+			<table id="messages" border=1>
+			
+			</table>
+			<script src = "/socket.io/socket.io.js"></script>
+			<script>
+				var socket = io();
+				
+				var username = document.getElementById("username");
+				var password = document.getElementById("password");
+				var div = document.getElementById("container");
+				var messagesTable=document.getElementById("messages");
+			
+				var selfUsername,sendUsername,i,messageBox,subjectBox;
+				
+				
+				function submit(){
+					
+					username.value=username.value.trim();
+					password.value=password.value.trim();
+					
+					socket.emit("validateLoginInfo",{username:username.value,password:password.value});
+					
+					socket.on("login",function(login){
+						
+						if(login){
+							
+							selfUsername=username.value;
+							
+							div.innerHTML = '<input type="text"id="username"name="username" placeholder="reciever"><br>\
+							<input type="text" id="subject" name="subject" placeholder="subject"><br>\
+							<textarea style="width:300px;height:300px" id="message" name="message" placeholder="message"></textarea><br>\
+							<input type="button" value="Send" onclick="send()">';
+							
+							messagesTable.innerHTML+='<tr>\
+								<th>To</th>\
+								<th>From</th>\
+								<th>Subject</th>\
+								<th>Message</th>\
+								<th>Date</th>\
+								<th>Remove</th>\
+							</tr>';
+							
+							sendUsername=document.getElementById("username");
+							messageBox=document.getElementById("message");		
+							subjectBox=document.getElementById("subject");
+							
+							socket.emit("getMessages");
+						}
+						
+						else{
+							alert("Login failed");
+						}
+					});
+				}
+				
+				function send(){
+				
+					sendUsername.value=sendUsername.value.trim();
+					messageBox.value=messageBox.value.trim();
+					subjectBox.value=subjectBox.value.trim();
+					
+					socket.emit("sendMessage",{to:sendUsername.value,from:selfUsername,subject:subjectBox.value,message:messageBox.value,date: new Date()});
+					
+				}
+				
+				socket.on("getMessage",function(message){
+					
+					if((message.to == selfUsername || message.from == selfUsername) && !message.deleted){
+						
+						messagesTable.innerHTML+='<tr id='+message.id.toString()+'>\
+						<td>'+message.to+'</td>\
+						<td>'+message.from+'</td>\
+						<td>'+message.subject+'</td>\
+						<td>'+message.message+'</td>\
+						<td>'+message.date+'</td>\
+						<td><input type="button" value="Remove" onclick="deleteMessage('+message.id.toString()+')"></td>\
+						</tr>';
+						
+					
+					}
+				});
+
+				socket.on("userNotExist",function(user){
+					
+					alert("Username "+user+" is not registered");
+					
+				});
+				
+				function deleteMessage(messageId){
+					document.getElementById(messageId).parentNode.removeChild(document.getElementById(messageId));
+					
+					socket.emit("deleteMessage",parseInt(messageId));
+				}
+				
+				
+				
+			</script>
+   </head> 
+</html>
