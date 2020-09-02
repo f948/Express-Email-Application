@@ -1,0 +1,156 @@
+<html>   
+   <head>
+		<div id="div">
+			Username 
+			<input type="text"   id="username"name="username">
+			<br>
+			Password
+			<input type="password" id="password" name="password">
+			<br>
+			<input type="button" id="submit" name="submit" value="Submit" onclick="submit()">
+		</div>
+			<script src = "/socket.io/socket.io.js"></script>
+			<script>
+				var socket = io();
+				var oldUsername,oldPassword;
+				var username,password,confirmPassword,div = document.getElementById("div");
+				var errorMessages;
+				var numLowercase=0,numUppercase=0,numSpecialChar=0,numInt=0;
+				
+				
+				function submit(){
+					
+					username = document.getElementById("username");
+					password = document.getElementById("password");
+			
+					username.value=username.value.trim();
+					password.value=password.value.trim();
+				
+					socket.emit("validateLoginInfo",{username:username.value,password:password.value});
+					
+					socket.on("login",function(login){
+						
+						if(login){
+							alert("Login suceussful");
+							
+							oldUsername=username.value;
+							oldPassword=password.value;
+							
+							div.innerHTML = 'New Username<input type="text"id="newUsername"name="newUsername"><br>\
+							New Password<input type="password" id="newPassword" name="newPassword"><br>\
+							Confirm New Password<input type="password" id="confirmNewPassword" name="confirmNewPassword"><br>\
+							<button type = "button" name = "button" onclick = "update()">Submit</button>';
+							
+							username = document.getElementById("newUsername");
+							password = document.getElementById("newPassword");
+							confirmPassword=document.getElementById("confirmNewPassword");
+					
+						}
+						else{
+							alert("Login failed");
+						}
+					});
+				}
+				
+				function update(){
+				
+					
+		
+					
+					username.value=username.value.trim();
+					password.value=password.value.trim();
+					confirmPassword.value=confirmPassword.value.trim();
+					
+
+					errorMessages="";
+					
+					// check if username is empty
+					if (username.value.length==0) {
+						errorMessages+="Username cannot be empty"+"\n";
+					}
+		 
+					// check if password is empty
+					if (password.value.length==0) {
+						errorMessages+="Password cannot be empty"+"\n";
+					}
+		
+					// check password content 
+					for(i=0;i<=password.value.length-1;i++){
+			
+						if("abcdefghijklmnoqrstuvwxyz".search(password[i]) !=-1){
+							numLowercase++;
+						}
+			
+						if("ABCDEFGHIJKLMNOQRSTUVWXYZ".search(password[i]) !=-1){
+							numUppercase++;
+						}
+			
+						if("!@#$%^&*()".search(password[i]) !=-1){
+							numSpecialChar++;
+						}
+			
+						if("1234567890".search(password[i])!=-1){
+							numInt++;
+						}
+					}
+					
+					// validate password 
+					if(numLowercase == 0 && password.value.length!=0){
+						errorMessages+="At least one character must be lowercase in password"+"\n";
+					}
+					
+					if(numUppercase == 0 && password.value.length!=0){
+						errorMessages+="At least one character must be uppercase in password"+"\n";
+					}
+					
+					if(numSpecialChar==0 && password.value.length!=0){
+						errorMessages+="At least one character must be a special character in password"+"\n";
+					}
+					
+					if(numInt==0 && password.value.length!=0){
+						errorMessages+="At least one character must be an integer in password"+"\n";
+					}
+        
+					if(password.value.length <8){
+						errorMessages+="Password must be at least 8 characters long"+"\n";
+					}
+					
+					if(password.value != confirmPassword.value){
+						errorMessages+="password and confirm password values must match"+"\n";
+					}
+					
+					// check if username or password is already in use 
+					socket.emit("validateRegisterInfo",{username:username.value,password:password.value});
+					
+					socket.on("usernameDuplicate",function(duplicate){
+						
+						if(duplicate){
+							errorMessages+="Username is already taken";
+						}
+					});
+					
+					socket.on("passwordDuplicate",function(duplicate){
+						
+						if(duplicate){
+							errorMessages+="Password is already taken";
+						}
+					});
+					
+					if(errorMessages==""){
+						
+						socket.emit("update",{oldUsername:oldUsername,oldPassword:oldPassword,newUsername:username.value,newPassword:password.value});
+						socket.emit("changeMessages",{oldUsername:oldUsername,newUsername:username.value});
+						alert("Update successful");
+					}
+					
+					else{
+						alert(errorMessages);
+					}
+		
+				
+					
+				}
+				
+			</script>
+   </head> 
+</html>
