@@ -1,0 +1,120 @@
+  
+<html>   
+   <head>
+			Username 
+			<input type="text"  id="username" name="username"/>
+			<br>
+			Password
+			<input type="password" id="password" name="password"/>
+			<br>
+			Confirm Password
+			<input type="password" id="confirm_password" name="confirm_password"/>
+			<br>
+			<input type="button" id="submit" name="submit" value="Submit" onclick="submit()">
+			<script src = "/socket.io/socket.io.js"></script>
+			
+			<script>
+			
+				var socket=io();
+				
+				var errorMessages="";
+				var i;
+				var numLowercase=0,numUppercase=0,numSpecialChar=0,numInt=0;
+				
+				var username = document.getElementById("username");
+				var password = document.getElementById("password");
+				var confirmPassword = document.getElementById("confirm_password");
+				
+				function submit(){
+					
+					username.value=username.value.trim();
+					password.value=password.value.trim();
+					confirmPassword.value=confirmPassword.value.trim();
+					
+					errorMessages="";
+					
+					// check if username is empty
+					if (username.value.length==0) {
+						errorMessages+="Username cannot be empty"+"\n";
+					}
+		 
+					// check if password is empty
+					if (password.value.length==0) {
+						errorMessages+="Password cannot be empty"+"\n";
+					}
+		
+					// check password content 
+					for(i=0;i<=password.value.length-1;i++){
+			
+						if("abcdefghijklmnoqrstuvwxyz".search(password[i]) !=-1){
+							numLowercase++;
+						}
+			
+						if("ABCDEFGHIJKLMNOQRSTUVWXYZ".search(password[i]) !=-1){
+							numUppercase++;
+						}
+			
+						if("!@#$%^&*()".search(password[i]) !=-1){
+							numSpecialChar++;
+						}
+			
+						if("1234567890".search(password[i])!=-1){
+							numInt++;
+						}
+					}
+					
+					// validate password 
+					if(numLowercase == 0 && password.value.length!=0){
+						errorMessages+="At least one character must be lowercase in password"+"\n";
+					}
+					
+					if(numUppercase == 0 && password.value.length!=0){
+						errorMessages+="At least one character must be uppercase in password"+"\n";
+					}
+					
+					if(numSpecialChar==0 && password.value.length!=0){
+						errorMessages+="At least one character must be a special character in password"+"\n";
+					}
+					
+					if(numInt==0 && password.value.length!=0){
+						errorMessages+="At least one character must be an integer in password"+"\n";
+					}
+        
+					if(password.value.length <8){
+						errorMessages+="Password must be at least 8 characters long"+"\n";
+					}
+					
+					if(password.value != confirmPassword.value){
+						errorMessages+="Password and confirm password values must match"+"\n";
+					}
+					
+					// check if username or password is already in use 
+					socket.emit("validateRegisterInfo",{username:username.value,password:password.value});
+
+				}
+				
+				socket.on("isRegisterInfoNew",function(info){
+						
+
+					if(info.usernameStatus){
+						errorMessages+="Username is already taken"+"\n";
+					}
+
+					if(info.passwordStatus){
+						errorMessages+="Password is already taken"+"\n";
+					}
+					
+					if(errorMessages==""){
+						
+						socket.emit("register",{username:username.value,password:password.value});
+						alert("Registration suceussful");
+					}
+					
+					else if(errorMessages!=""){
+						alert(errorMessages);
+					}
+				});
+		
+			</script>
+   </head> 
+</html>
