@@ -10,7 +10,7 @@ var adminPassword="Administrator@09";
 const port = process.env.PORT || 3000
 
 // register for an account
-app.get('/register', function (req, res) {
+app.get('/', function (req, res) {
 	res.sendfile("register.html");
 });
 
