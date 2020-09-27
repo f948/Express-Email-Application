@@ -14,12 +14,12 @@ app.get('/', function (req, res) {
 });
 
 // register for an account
-app.get('/register', function (req, res) {
+app.get('/register.html', function (req, res) {
 	res.sendfile("register.html");
 });
 
 // login into your account
-app.get('/login', function (req, res) {
+app.get('/login.html', function (req, res) {
 	if(connectedUsers<50){
 		res.sendfile("login.html");
 	}
@@ -29,13 +29,13 @@ app.get('/login', function (req, res) {
 });
 
 // reset your username or password
-app.get('/update', function (req, res) {
+app.get('/update.html', function (req, res) {
 	res.sendfile("update.html");
 	
 });
 
 // navigate to admin dashboard
-app.get('/admin', function (req, res) {
+app.get('/admin.html', function (req, res) {
 	res.sendfile("admin.html");
 	
 });
