@@ -1,0 +1,251 @@
+  
+<html>   
+   <head>
+		
+		<style>
+		
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* Full-width input fields */
+input[type=text], input[type=password] {
+  width: 10%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Set a style for all buttons */
+#submit,#change{
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 10%;
+}
+
+#delete{
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+#delete,#submit,#change:hover {
+  opacity: 0.8;
+}
+
+
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: #f44336;
+}
+
+/* Center the image and position the close button */
+.imgcontainer {
+  text-align: center;
+  margin: 24px 0 12px 0;
+  position: relative;
+}
+
+img.avatar {
+  width: 40%;
+  border-radius: 50%;
+}
+
+.container {
+  padding: 16px;
+}
+
+span.psw {
+  float: right;
+  padding-top: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button (x) */
+.close {
+  position: absolute;
+  right: 25px;
+  top: 0;
+  color: #000;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: red;
+  cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)} 
+  to {-webkit-transform: scale(1)}
+}
+  
+@keyframes animatezoom {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+  span.psw {
+     display: block;
+     float: none;
+  }
+  .cancelbtn {
+     width: 100%;
+  }
+}
+
+
+#posts {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#posts td, #posts th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#posts tr:nth-child(even){background-color: #f2f2f2;}
+
+#posts tr:hover {background-color: #ddd;}
+
+#posts th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
+.navbar {
+  overflow: hidden;
+  background-color: black;
+}
+.navbar a {
+  float: left;
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 20px;
+  text-decoration: none;
+}
+			
+</style>
+			<div class="navbar">
+<a href="register.html">Register</a>
+ <a href="posts.html">Posts</a>
+ <a href="email.html">Email</a>
+  <a href="search.html">Search</a>
+ <a href="update.html">Update Account</a>
+ <a href="admin.html">Login as Administrator</a>
+</div>
+		<div class="container"id="container">
+			<h1>Find a User</h1>
+			<p>Search for a user to view their posts</p><hr>
+			<input type="text" id="user"><br>
+			<input type="button" id="submit" value="Submit" onclick="getPosts()">
+
+			
+		<h1>Posts</h1>
+		<hr>
+		<table id="posts" border=1>
+			
+		</table>
+		</div>
+		<script src = "/socket.io/socket.io.js"></script>
+		<script>
+			
+			var socket = io();
+			
+			var postsTable = document.getElementById("posts");
+			var i,username=document.getElementById("user");
+			
+			function getPosts(){
+				
+				username.value=username.value.trim();
+				
+				socket.emit("getUserPosts",username.value);
+				
+				postsTable.innerHTML='<tr>\
+								<th>From</th>\
+								<th>Subject</th>\
+								<th>Image</th>\
+								<th>Message</th>\
+								<th>Date</th>\
+							</tr>';
+							
+			}
+
+				socket.on("getPost",function(post){
+					
+					
+							
+					if(post.from == username.value && !post.deleted){
+						
+						postsTable.innerHTML+='<tr>\
+						<td>'+post.from+'</td>\
+						<td>'+post.subject+'</td>\
+						<td>'+post.image+'</td>\
+						<td>'+post.message+'</td>\
+						<td>'+post.date+'</td>\
+						</tr>';
+						
+					
+					}
+				});
+				
+				socket.on("userNotExist",function(user){
+					
+					alert("Username "+user+" is not registered");
+					
+				});
+			
+					
+		</script>
+	
+	</head>
+</html>
