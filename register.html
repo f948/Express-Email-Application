@@ -1,0 +1,325 @@
+  
+<html>   
+   <head>
+		
+		<style>
+		
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* Full-width input fields */
+input[type=text], input[type=password] {
+  width: 10%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Set a style for all buttons */
+#delete{
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+#delete:hover {
+  opacity: 0.8;
+}
+
+/* Set a style for all buttons */
+#submit{
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 10%;
+}
+
+#submit:hover {
+  opacity: 0.8;
+}
+
+/* Set a style for all buttons */
+#send{
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 10%;
+}
+
+#send:hover {
+  opacity: 0.8;
+}
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: #f44336;
+}
+
+/* Center the image and position the close button */
+.imgcontainer {
+  text-align: center;
+  margin: 24px 0 12px 0;
+  position: relative;
+}
+
+img.avatar {
+  width: 40%;
+  border-radius: 50%;
+}
+
+.container {
+  padding: 16px;
+}
+
+span.psw {
+  float: right;
+  padding-top: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button (x) */
+.close {
+  position: absolute;
+  right: 25px;
+  top: 0;
+  color: #000;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: red;
+  cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)} 
+  to {-webkit-transform: scale(1)}
+}
+  
+@keyframes animatezoom {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+  span.psw {
+     display: block;
+     float: none;
+  }
+  .cancelbtn {
+     width: 100%;
+  }
+}
+
+#messages {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#messages td, #messages th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#messages tr:nth-child(even){background-color: #f2f2f2;}
+
+#messages tr:hover {background-color: #ddd;}
+
+#messages th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
+.navbar {
+  overflow: hidden;
+  background-color: black;
+}
+.navbar a {
+  float: left;
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 20px;
+  text-decoration: none;
+}
+			
+</style>
+			<div class="navbar">
+<a href="register.html">Register</a>
+ <a href="posts.html">Posts</a>
+ <a href="email.html">Email</a>
+  <a href="search.html">Search</a>
+ <a href="update.html">Update Account</a>
+ <a href="admin.html">Login as Administrator</a>
+</div>
+		<div class="container" id="container">
+		
+			<h1>Sign Up</h1>
+			<p>Please fill in this form to create an account</p>
+			<hr>
+			<label for="username"><b>Username</b></label>
+			<input type="text"  id="username" name="username"/>
+			<br>
+			<label for="password"><b>Password</b></label>
+			<input type="password" id="password" name="password"/>
+			<br>
+			<label for="confirm_password"><b>Confirm Password</b></label>
+			<input type="password" id="confirm_password" name="confirm_password"/>
+			<br>
+			<input type="button" id="submit" name="submit" value="Submit" onclick="submit()">
+			<script src = "/socket.io/socket.io.js"></script>
+		</div>
+			<script>
+			
+				var socket=io();
+				
+				var errorMessages="";
+				var i;
+				var numLowercase=0,numUppercase=0,numSpecialChar=0,numInt=0;
+				
+				var username = document.getElementById("username");
+				var password = document.getElementById("password");
+				var confirmPassword = document.getElementById("confirm_password");
+				
+				function submit(){
+					
+					username.value=username.value.trim();
+					password.value=password.value.trim();
+					confirmPassword.value=confirmPassword.value.trim();
+					
+					errorMessages="";
+					
+					// check if username is empty
+					if (username.value.length==0) {
+						errorMessages+="Username cannot be empty"+"\n";
+					}
+		 
+					// check if password is empty
+					if (password.value.length==0) {
+						errorMessages+="Password cannot be empty"+"\n";
+					}
+		
+					
+					// check password content 
+					for(i=0;i<=password.value.length-1;i++){
+			
+						if("abcdefghijklmnoqrstuvwxyz".search(password[i]) !=-1){
+							numLowercase++;
+						}
+			
+						if("ABCDEFGHIJKLMNOQRSTUVWXYZ".search(password[i]) !=-1){
+							numUppercase++;
+						}
+			
+						if("!@#$%^&*()".search(password[i]) !=-1){
+							numSpecialChar++;
+						}
+			
+						if("1234567890".search(password[i])!=-1){
+							numInt++;
+						}
+					}
+					
+					// validate password 
+					if(numLowercase == 0 && password.value.length!=0){
+						errorMessages+="At least one character must be lowercase in password"+"\n";
+					}
+					
+					if(numUppercase == 0 && password.value.length!=0){
+						errorMessages+="At least one character must be uppercase in password"+"\n";
+					}
+					
+					if(numSpecialChar==0 && password.value.length!=0){
+						errorMessages+="At least one character must be a special character in password"+"\n";
+					}
+					
+					if(numInt==0 && password.value.length!=0){
+						errorMessages+="At least one character must be an integer in password"+"\n";
+					}
+        
+					if(password.value.length <8){
+						errorMessages+="Password must be at least 8 characters long"+"\n";
+					}
+					
+					if(password.value != confirmPassword.value){
+						errorMessages+="Password and confirm password values must match"+"\n";
+					}
+					
+					// check if username or password is already in use 
+					socket.emit("validateRegisterInfo",{username:username.value,password:password.value});
+
+				}
+				
+				socket.on("isRegisterInfoNew",function(info){
+						
+
+					if(info.usernameStatus){
+						errorMessages+="Username is already taken"+"\n";
+					}
+
+					if(info.passwordStatus){
+						errorMessages+="Password is already taken"+"\n";
+					}
+					
+					if(errorMessages==""){
+						
+						socket.emit("register",{username:username.value,password:password.value});
+						alert("Registration suceussful");
+					}
+					
+					else if(errorMessages!=""){
+						alert(errorMessages);
+					}
+				});
+		
+			</script>
+   </head> 
+</html>
